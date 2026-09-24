@@ -193,8 +193,9 @@ class Merging(Abstract):
                     hklpaths.append(path)
 
                 else:
-                    err = "couldn't find XDS_ASCII.HKLs %s" % filepath
-                    logger.info('Error:{}'.format(err))
+                    pass
+                    #err = "couldn't find XDS_ASCII.HKLs %s" % filepath
+                    #logger.info('Error:{}'.format(err))
         except KeyError as e:
             logger.error(e)
             self.setFailure()
@@ -401,7 +402,7 @@ class Merging(Abstract):
                 pass
 
             indict = {"listofHKLfiles": self.results['hklpaths_found'],
-                      "fom":'rmeas'}
+                      "fom":'bfac'}
             sc = ScaleUtils(indict)
             sc.ref_choice(indict)
 

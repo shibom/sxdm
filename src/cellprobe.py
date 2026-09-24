@@ -7,7 +7,8 @@ __refactordate__ = "25/05/2021"
 
 import sys, os
 import numpy as np
-
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy import stats
 import scipy.cluster.hierarchy as sch

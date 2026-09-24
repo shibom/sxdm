@@ -71,7 +71,6 @@ class ScaleUtils(Abstract):
                 correct_parse.parse_xds_stats(indict)
                 mean_rmeas = correct_parse.mean_rmeas_calc(correct_parse.results['xds_stat'])
                 rmeas_dict[fname] = mean_rmeas
-
             self.results['rmeas_sorted_hkls'] = sorted(rmeas_dict.items(), key=lambda x:x[1])
         return
 
@@ -100,6 +99,7 @@ class ScaleUtils(Abstract):
         else:
             pass
         self.results['reference'] = reference
+        print(self.results)
         return
 
     def Bfact_sorter(self, inData):

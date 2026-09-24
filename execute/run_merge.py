@@ -42,12 +42,13 @@ def get_paths_xscale():
 def optargs():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", type=str, nargs='+')
-    parser.add_argument("--expt", type=str)
-    parser.add_argument("--isa_cut", type=str, default='3.0')
+    parser.add_argument("--dirlist", type=str, nargs='+')
+    parser.add_argument("--xtallist", type=str, nargs='+')
+    parser.add_argument("--experiment", type=str)
+    parser.add_argument("--isa_cutoff", type=str, default='3.0')
     parser.add_argument("--reference", type=str)
-    parser.add_argument("--res_cut", type=str, default='2.0')
-    parser.add_argument("--friedel", type=str, default="FALSE")
+    parser.add_argument("--resolution", type=str, default='2.0')
+    parser.add_argument("--friedels_law", type=str, default="TRUE")
     parser.add_argument("--suffix", type=str)
     args = parser.parse_args()
     return args
@@ -61,26 +62,25 @@ if __name__ == '__main__':
     filemode='a')
 
     op = optargs()
-
+    '''
     if op.root is not None and op.expt is not None:
         hklpath_list = finder(op.root, op.expt)
 
     else:
         logger.error("command line arguments are missing, quit!")
         sys.exit()
-
+    '''
     inData=dict()
-    inData['dirlist'] = op.root
-    inData['experiment'] = op.expt
-    inData['reference'] = op.reference
-    inData['resolution'] = op.res_cut
-    inData['friedels_law'] = op.friedel
-    inData['suffix'] = op.suffix
+    for k, v in op.__dict__.items():
+        if v is not None:
+            inData[k] = v
+        else:
+            pass
 
     mm = Merging(inData)
 
-    # mm.setOutputDirectory()
-    # mm.writeInputData(inData)
+    mm.setOutputDirectory()
+    mm.writeInputData(inData)
 
     mm.run_()
     if mm.is_success():

@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-import jsonschema
+#import jsonschema
 import pathlib
 import shutil
 from datetime import datetime
@@ -95,8 +95,11 @@ class Reprocess(object):
       def makeOutputDirectory(self):
           self.setOutputDirectory()
           new_output = self.getOutputDirectory() / datetime.now().strftime('proc_%Y%m%d')
-          new_output.mkdir(parents=True, exist_ok=True)
-          os.chdir(new_output)
+          try:
+              new_output.mkdir(parents=True)
+          except FileExistsError:
+              pass
+          os.chdir(str(new_output))
           self.setOutputDirectory(path=str(new_output))
 
           old_folders = self.xdsfolder_search()
@@ -108,16 +111,18 @@ class Reprocess(object):
                  old_folder_path = pathlib.Path(old_folders[ii])
                  folder_structure = old_folder_path.parents
                  xtal_name = 'xtal_%d' %ii
-                 new_xds_dir = self.getOutputDirectory() / folder_structure[2].name / folder_structure[1].name / xtal_name
-                 new_xds_dir.mkdir(parents=True, exist_ok=True)
+                 new_xds_dir = self.getOutputDirectory() / folder_structure[3].name / folder_structure[2].name / folder_structure[1].name / xtal_name
+                 new_xds_dir.mkdir(parents=True)
                                
                  old_xds = old_folders[ii] / 'XDS.INP'
-                 if old_xds.exists() and folder_structure[1].exists():
+                 if old_xds.exists() and folder_structure[0].exists():
                     new_xds_inp = new_xds_dir / 'XDS.INP_old'
-                    shutil.copy(old_xds, new_xds_inp)
+                    shutil.copy(str(old_xds), str(new_xds_inp))
                     # print("%s old_xds --> new path %s" % (old_xds, xtal_name))                                 
                     listofxdsdirs.append(new_xds_dir)
-                    listofLinks.append(folder_structure[1] / 'links')
+                    folder_raw = str(folder_structure[0]).replace("PROCESSED_DATA", "RAW_DATA")
+                    # listofLinks.append(folder_structure[1] / 'links')
+                    listofLinks.append(folder_raw)
                  else:
                     pass
 
@@ -130,6 +135,10 @@ class Reprocess(object):
           xds_inData = dict()
           if not fname.exists():
              print('%s file does not exist; cannot create XDS.INP file' %fname)
+             return xds_inData
+          if fname.stat().st_size == 0:
+             print('%s file exists but empty' %fname)
+             
              return xds_inData
           rex_dict = dict(template=re.compile(r'NAME_TEMPLATE_OF_DATA_FRAMES=(?P<template>.*)\n'),
                detZ=re.compile(r'DETECTOR_DISTANCE=\s(?P<detZ>([0-9.]+))\n'),
@@ -144,6 +153,7 @@ class Reprocess(object):
                           if k == 'template':
                              template_old = match.group('template')
                              xds_inData['template_name'] = pathlib.Path(template_old).name
+                             print(f"new xds.inp file: {xds_inData['template_name']}")
                           if k == 'detZ':
                              xds_inData['detZ'] = match.group('detZ')
                           if k == 'data_range':
@@ -170,25 +180,32 @@ class Reprocess(object):
 
       def xds_index_inp(self, XDSINP_old, linkname):
           xds_inData = self.DictionaryOldXDS(XDSINP_old)
+          if not xds_inData:
+             pass
+             return
           xds_inData['res_cut'] = self.jshandle.get('index_res','5.0')
           xds_inData['jobs'] = 'XYCORR INIT COLSPOT IDXREF'
-          xds_inData['template'] = os.path.join(linkname, xds_inData['template_name'])
-          xds_string = xds_input.INP[self.jshandle.get('beamline', 'ID23-2')]
-          new_xds_path = pathlib.Path(os.path.join(os.getcwd(), 'XDS.INP'))
-          if not new_xds_path.exists():
-             fh = open(str(new_xds_path), 'w')
-             try:
-               fh.write(xds_string.format(**xds_inData))
-               fh.close()
-             except Exception as err:
-               print(err)
-               pass
-          else:
+          try:
+             xds_inData['template'] = os.path.join(linkname, xds_inData['template_name'])
+             xds_string = xds_input.INP[self.jshandle.get('beamline', 'ID23-2')]
+             new_xds_path = pathlib.Path(os.path.join(os.getcwd(), 'XDS.INP'))
+             if not new_xds_path.exists():
+                fh = open(str(new_xds_path), 'w')
+             
+                fh.write(xds_string.format(**xds_inData))
+                fh.close()
+             else:
+                pass
+          except Exception as err:
+             print(err)
              pass
           return
 
       def xds_integrate_inp(self, XDSINP_old, linkname):
           xds_inData = self.DictionaryOldXDS(XDSINP_old)
+          if not xds_inData:
+             pass
+             return
           xds_inData['res_cut'] = self.jshandle.get('resolution_cutoff', '0.0')
           xds_inData['jobs'] = 'DEFPIX INTEGRATE CORRECT'
           xds_inData['template'] = os.path.join(linkname, xds_inData['template_name'])
@@ -217,13 +234,13 @@ class Reprocess(object):
           '''
           try:
               old_xds = xdsdir / 'XDS.INP_old'
-              os.chdir(xdsdir)
+              os.chdir(str(xdsdir))
               self.xds_index_inp(old_xds, linkname)
               sub.call(['xds_par > /dev/null'], shell=True)
               
               self.xds_integrate_inp(old_xds, linkname)
               sub.call(['xds_par > /dev/null'], shell=True)
-              os.chdir(self.getOutputDirectory())
+              os.chdir(str(self.getOutputDirectory()))
               HKLfile = pathlib.Path(xdsdir / 'XDS_ASCII.HKL')
               if not HKLfile.exists():
                  print("Failed to process %s" %xdsdir)

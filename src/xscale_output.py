@@ -42,15 +42,16 @@ class OutputParser(Abstract):
         fh = open(filename, 'r')
         _all = fh.readlines()
         fh.close()
-        start_idx = [idx for idx, search in enumerate(_all) if search == search_string]
-        useful = _all[start_idx[-1]+1:start_idx[-1]+13] # get only last chunk of statistics tables
+        try:
+           start_idx = [idx for idx, search in enumerate(_all) if search == search_string]
+           useful = _all[start_idx[-1]+1:start_idx[-1]+13] # get only last chunk of statistics tables
 
-        for lines in useful:
-            if any(k in lines for k in skip_string):
-                pass
-            else:
-                line = lines.split()
-                if len(line) > 0:
+           for lines in useful:
+              if any(k in lines for k in skip_string):
+                 pass
+              else:
+                 line = lines.split()
+                 if len(line) > 0:
                     each_row = dict()
                     each_row['order'] = count
                     each_row['resolution_limit'] = float(line[0])
@@ -75,8 +76,11 @@ class OutputParser(Abstract):
                         each_row['anomalous_correlation'] = float(line[11])
                     self.results['xds_stat'].append(each_row)
                     count += 1
-                else:
-                    pass
+                 else:
+                     pass
+        except Exception as e:
+             print(e)
+             pass
 
 
     def parse_xscale_output(self, inData):
