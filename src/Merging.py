@@ -12,7 +12,7 @@ import shutil
 import time
 import subprocess as sub
 import pathlib
-import jsonschema
+#import jsonschema
 
 from src.cellprobe import Cell
 import src.index_check as index_check
@@ -172,7 +172,7 @@ class Merging(Abstract):
         if not isXtal:
             for folder in self.jshandle['dirlist']:
                 dirs = pathlib.Path(folder)
-                posix = list(dirs.glob('*/*'))
+                posix = list(dirs.glob('*/*/*'))
                 xtallist += list(map(lambda x: str(x), posix))
         else:
             msg = "List of xtal folders directly provided, not searching\n"
