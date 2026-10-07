@@ -158,12 +158,12 @@ class Cell(Abstract):
             max_size.append(len(i))
             logger.info("cluster: %d; size: %d" %((k+1),len(i)))
         msg = "most populated cluster: %d" %(max_size.index(max(max_size))+1)
-        logger.info('MSG: {}'.format(msg))
+        logger.info('CELL-MSG: {}'.format(msg))
         best_cluster_name = max_size.index(max(max_size))
         self.results['cell_ar_best_cluster'] = np.empty((len(idx[best_cluster_name]), 6))
         for i in range(len(idx[best_cluster_name])):
             item = idx[best_cluster_name][i]
-            cell_selected_file = self.results['hklList'][item]
+            cell_selected_file = self.results['hklList'][item] 
             self.results['cell_select'].append(cell_selected_file)
             unit_cell = Cell.get_cells(cell_selected_file)
             self.results['cell_ar_best_cluster'][i,0] = unit_cell['a']
@@ -172,13 +172,17 @@ class Cell(Abstract):
             self.results['cell_ar_best_cluster'][i,3] = unit_cell['al']
             self.results['cell_ar_best_cluster'][i,4] = unit_cell['be']
             self.results['cell_ar_best_cluster'][i,5] = unit_cell['ga']
+
+        logger.info('Cell best cluster array: {}'.format(self.results['cell_ar_best_cluster']))
+
         #calculate median values for unit cell parameters from most populated cluster..
-        self.results['a_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,0])[0][0]
-        self.results['b_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,1])[0][0]
-        self.results['c_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,2])[0][0]
-        self.results['al_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,3])[0][0]
-        self.results['be_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,4])[0][0]
-        self.results['ga_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,5])[0][0]
+        logger.info('DEBUG: {}'.format(stats.mode(self.results['cell_ar_best_cluster'][:,0])[0]))
+        self.results['a_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,0])[0]
+        self.results['b_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,1])[0]
+        self.results['c_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,2])[0]
+        self.results['al_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,3])[0]
+        self.results['be_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,4])[0]
+        self.results['ga_mode'] = stats.mode(self.results['cell_ar_best_cluster'][:,5])[0]
 
         logger.info('Cell selection # HKLs: %d' %len(self.results['cell_select']))
 

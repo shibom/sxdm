@@ -230,6 +230,7 @@ class Merging(Abstract):
 
     def indexing_(self):
         self.results['reference'] = self.jshandle.get('reference', self.results['hklpaths_found'][0])
+        logger.info("Reference dataset: %s" %self.results['reference'])
         try:
             for ii in range(1, len(self.results['hklpaths_found'])):
                 if not index_check.similar_symmetry(self.results['reference'], self.results['hklpaths_found'][ii]):
@@ -402,9 +403,12 @@ class Merging(Abstract):
                 pass
 
             indict = {"listofHKLfiles": self.results['hklpaths_found'],
-                      "fom":'bfac'}
+                      "fom":'rmeas'}
             sc = ScaleUtils(indict)
-            sc.ref_choice(indict)
+            if not os.path.exists(self.jshandle['reference']):
+               sc.ref_choice(indict)
+            else:
+               sc.results['reference'] = self.jshandle['reference']
 
             logging.info('lowest-Rmeas file: %s' %sc.results['reference'])
             indata_ascii = {"xds_ascii": sc.results['reference']}
@@ -413,7 +417,7 @@ class Merging(Abstract):
 
             self.results['space_group'] = space_group[ref_for_cell_sg.results['spg']][0]
             self.results['unit-cell'] = ref_for_cell_sg.results['unit_cell']
-            self.results['friedel'] = ref_for_cell_sg.results['anom']
+            self.results['friedel'] = ref_for_cell_sg.results.get('anom', 'TRUE')
             config['reference'] = sc.results['reference']
             self.create_file_links()
             self.create_inp(self.results['filelinks'], config)
