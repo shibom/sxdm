@@ -195,8 +195,8 @@ class Cell(Abstract):
         self.setter(inData)
         tmp_fileList = [] #Local variable - a list of lists
 
-        for i in range(len(self.results['hkllist'])):
-            unit_cell = self.get_cells(self.results['hkllist'][i])
+        for i in range(len(self.results['hklList'])):
+            unit_cell = self.get_cells(self.results['hklList'][i])
 
 
             self.results['cell_ar'][i,0] = unit_cell['a']
@@ -213,19 +213,19 @@ class Cell(Abstract):
         be_ohne, be_indx = self.reject_outlier(self.results['cell_ar'][:,4])
         ga_ohne, ga_indx = self.reject_outlier(self.results['cell_ar'][:,5])
 
-        self.results['cell_ar'] = np.column_stack(a_ohne, b_ohne, c_ohne, al_ohne, be_ohne, ga_ohne)
+        self.results['cell_ar'] = np.column_stack((a_ohne, b_ohne, c_ohne, al_ohne, be_ohne, ga_ohne))
 
         # calculate median values for unit cell parameters..
-        self.results['a_mode'] = stats.mode(a_ohne)[0][0]
-        self.results['b_mode'] = stats.mode(b_ohne)[0][0]
-        self.results['c_mode'] = stats.mode(c_ohne)[0][0]
-        self.results['al_mode'] = stats.mode(al_ohne)[0][0]
-        self.results['be_mode'] = stats.mode(be_ohne)[0][0]
-        self.results['ga_mode'] = stats.mode(ga_ohne)[0][0]
+        self.results['a_mode'] = stats.mode(a_ohne)[0]
+        self.results['b_mode'] = stats.mode(b_ohne)[0]
+        self.results['c_mode'] = stats.mode(c_ohne)[0]
+        self.results['al_mode'] = stats.mode(al_ohne)[0]
+        self.results['be_mode'] = stats.mode(be_ohne)[0]
+        self.results['ga_mode'] = stats.mode(ga_ohne)[0]
 
         for index in (a_indx, b_indx, c_indx, al_indx, be_indx, ga_indx):
             if index: # no outlier may lead to an empty array, avoiding it..
-                tmp_fileList.append([self.results['hkllist'][i] for i in index])
+                tmp_fileList.append([self.results['hklList'][i] for i in index])
 
         cell_select = set(tmp_fileList[0]) #use set method to find common HKL files after outlier rejection
         for s in tmp_fileList[1:2]:

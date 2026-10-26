@@ -470,7 +470,7 @@ class Merging(Abstract):
             celldict = {"listofHKLfiles": self.results['filelinks']}
             celler = Cell(celldict)
             celler.setter(celldict)
-            if len(celler.results['hklList']) > 200:
+            if len(celler.results['hklList']) > 1000:
                 celler.cell_analysis(celldict)
                 self.results['cell_array'] = celler.results['cell_ar'].tolist()
                 self.results['histogram'] = celler.dict_for_histogram()
